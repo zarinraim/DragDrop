@@ -31,7 +31,7 @@ internal class DraggableState(private val scrollState: ScrollableState) {
     /**
      * Draggable item state holder
      */
-    var draggableContent by mutableStateOf<(@Composable (@Composable (() -> Unit)) -> Unit)?>(null)
+    var draggableContent by mutableStateOf<(@Composable (@Composable ((DraggableItemState) -> Unit)) -> Unit)?>(null)
 
     /**
      * Data that must receive [DropTarget]
@@ -43,7 +43,7 @@ internal class DraggableState(private val scrollState: ScrollableState) {
     fun onDragStart(position: Offset, offset: Offset, data: Any?) {
         isDragging = true
         dragPosition = position + offset
-        draggableContent = { content -> content() }
+        draggableContent = { content -> content(draggableItemState) }
         sourceEntity = data
     }
 
@@ -67,6 +67,26 @@ internal class DraggableState(private val scrollState: ScrollableState) {
             )
             speed += Acceleration
         }
+    }
+
+    private val draggableItemState: DraggableItemState
+        get() {
+            return if (activeTargetItems.size == 1) {
+                activeTargetItems[activeTargetItems.keys.first()]!!
+            } else {
+                DraggableItemState.Initiated
+            }
+        }
+
+    private var activeTargetItems by mutableStateOf(emptyMap<String, DraggableItemState>())
+
+    fun onHoveredTarget(id: String, enabled: Boolean) {
+        val draggableItemState = if (enabled) DraggableItemState.Enabled else DraggableItemState.Disabled
+        activeTargetItems += (id to draggableItemState)
+    }
+
+    fun onUnHoveredTarget(id: String) {
+        activeTargetItems = activeTargetItems.toMutableMap().also { it.remove(id) }
     }
 
     enum class ScrollDirection { Up, Down, None }

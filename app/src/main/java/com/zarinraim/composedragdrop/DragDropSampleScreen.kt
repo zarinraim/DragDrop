@@ -3,8 +3,10 @@ package com.zarinraim.composedragdrop
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -16,10 +18,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zarinraim.composedragdrop.DragDropSampleViewModel.ScreenState
 import com.zarinraim.composedragdrop.ui.theme.ComposeDragDropTheme
+import com.zarinraim.dragdrop.DraggableItemState
 import com.zarinraim.dragdrop.DropTarget
 import com.zarinraim.dragdrop.LongPressDraggable
 import com.zarinraim.dragdrop.dragOnLongPress
@@ -42,7 +46,7 @@ private fun Content(
     val scrollState = rememberScrollState()
 
     LongPressDraggable(
-        draggableItem = { DraggableItem() },
+        draggableItem = { DraggableItem(state = it) },
         scrollState = scrollState,
     ) {
         Column(
@@ -86,7 +90,7 @@ private fun SourceTargetItem(
 
         Item(
             text = item.text,
-            modifier = Modifier.dragOnLongPress(item.text)
+            modifier = if (item.enabled) Modifier.dragOnLongPress(item.text) else Modifier,
         )
     }
 }
@@ -108,14 +112,18 @@ private fun Item(
 }
 
 @Composable
-private fun DraggableItem() {
+private fun DraggableItem(state: DraggableItemState) {
     val shape = MaterialTheme.shapes.small
-
+    val background = when (state) {
+        DraggableItemState.Enabled -> Color(0xffacf2c6)
+        DraggableItemState.Disabled -> Color(0xfff2baac)
+        DraggableItemState.Initiated -> Color(0xffccdbd2)
+    }
     Column(
         modifier = Modifier
             .clip(shape = shape)
             .border(width = .15.dp, color = MaterialTheme.colorScheme.primary, shape = shape)
-            .background(color = MaterialTheme.colorScheme.tertiaryContainer, shape = shape)
+            .background(color = background, shape = shape)
             .padding(vertical = 8.dp, horizontal = 16.dp)
     ) {
         Text(text = "Drag me")
@@ -127,7 +135,11 @@ private fun DraggableItem() {
 fun DraggableItemPreview() {
     ComposeDragDropTheme {
         Column {
-            DraggableItem()
+            DraggableItem(state = DraggableItemState.Initiated)
+            Spacer(modifier = Modifier.height(16.dp))
+            DraggableItem(state = DraggableItemState.Enabled)
+            Spacer(modifier = Modifier.height(16.dp))
+            DraggableItem(state = DraggableItemState.Disabled)
         }
     }
 }

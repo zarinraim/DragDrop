@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -12,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import java.util.UUID
 
 /**
  * Drop target composable
@@ -41,11 +43,21 @@ fun <T> DropTarget(
     // draggable item is over enabled drop target
     val isEnabledDropTarget = isCurrentDropTarget && enabled
 
+    val targetId by remember { mutableStateOf(UUID.randomUUID().toString()) }
+
+    LaunchedEffect(isCurrentDropTarget) {
+        if (isCurrentDropTarget) {
+            state.onHoveredTarget(targetId, enabled)
+        } else {
+            state.onUnHoveredTarget(targetId)
+        }
+    }
+
     Box(
         modifier = modifier
             .onGloballyPositioned {
                 it.boundsInRoot().let { rect ->
-                    isItemInDropTarget = rect.contains(dragPosition) && state.isDragging
+                    isItemInDropTarget = (rect.contains(dragPosition) && state.isDragging)
                 }
             }
             .background(if (isEnabledDropTarget) onFocusBackground else Color.Transparent),

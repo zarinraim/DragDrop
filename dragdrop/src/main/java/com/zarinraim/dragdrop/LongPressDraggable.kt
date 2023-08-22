@@ -33,7 +33,7 @@ internal val LocalDraggableState = compositionLocalOf { DraggableState(ScrollSta
  */
 @Composable
 fun LongPressDraggable(
-    draggableItem: @Composable () -> Unit,
+    draggableItem: @Composable (DraggableItemState) -> Unit,
     scrollState: ScrollableState,
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit,
