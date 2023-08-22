@@ -1,0 +1,152 @@
+package com.zarinraim.composedragdrop
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.zarinraim.composedragdrop.DragDropSampleViewModel.ScreenState
+import com.zarinraim.composedragdrop.ui.theme.ComposeDragDropTheme
+import com.zarinraim.dragdrop.DropTarget
+import com.zarinraim.dragdrop.LongPressDraggable
+import com.zarinraim.dragdrop.dragOnLongPress
+
+@Composable
+fun DragDropSampleScreen(viewModel: DragDropSampleViewModel) {
+    Content(
+        state = viewModel.state.value,
+        onDrop = viewModel::onDrop,
+        closeDialog = viewModel::closeDialog,
+    )
+}
+
+@Composable
+private fun Content(
+    state: ScreenState,
+    onDrop: (String, String) -> Unit,
+    closeDialog: () -> Unit,
+) {
+    val scrollState = rememberScrollState()
+
+    LongPressDraggable(
+        draggableItem = { DraggableItem() },
+        scrollState = scrollState,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+        ) {
+            state.items.forEach { item ->
+                SourceTargetItem(
+                    item = item,
+                    onDrop = onDrop
+                )
+            }
+        }
+    }
+
+    if (state.dropDialogVisible) {
+        AlertDialog(
+            onDismissRequest = closeDialog,
+            confirmButton = { TextButton(onClick = closeDialog) { Text(text = "Close") } },
+            text = {
+                Text(text = state.dialogMessage)
+            }
+        )
+    }
+}
+
+@Composable
+private fun SourceTargetItem(
+    item: ScreenState.Item,
+    onDrop: (String, String) -> Unit,
+) {
+    DropTarget(
+        targetEntity = item.text,
+        enabled = item.enabled,
+        onFocusBackground = MaterialTheme.colorScheme.primaryContainer,
+    ) { sourceData ->
+        if (sourceData != null) {
+            onDrop(sourceData, item.text)
+        }
+
+        Item(
+            text = item.text,
+            modifier = Modifier.dragOnLongPress(item.text)
+        )
+    }
+}
+
+@Composable
+private fun Item(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .border(0.5.dp, MaterialTheme.colorScheme.secondaryContainer)
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(text = text)
+    }
+}
+
+@Composable
+private fun DraggableItem() {
+    val shape = MaterialTheme.shapes.small
+
+    Column(
+        modifier = Modifier
+            .clip(shape = shape)
+            .border(width = .15.dp, color = MaterialTheme.colorScheme.primary, shape = shape)
+            .background(color = MaterialTheme.colorScheme.tertiaryContainer, shape = shape)
+            .padding(vertical = 8.dp, horizontal = 16.dp)
+    ) {
+        Text(text = "Drag me")
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DraggableItemPreview() {
+    ComposeDragDropTheme {
+        Column {
+            DraggableItem()
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DragDropSamplePreview() {
+    ComposeDragDropTheme {
+        Content(
+            state = ScreenState(
+                items = listOf(
+                    ScreenState.Item(text = "Alice", enabled = true),
+                    ScreenState.Item(text = "Bob", enabled = true)
+                ),
+                dropDialogVisible = false,
+                dialogMessage = "",
+            ),
+            onDrop = { _, _ -> },
+            closeDialog = {},
+        )
+    }
+}
