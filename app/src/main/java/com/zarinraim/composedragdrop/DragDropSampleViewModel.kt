@@ -11,13 +11,22 @@ class DragDropSampleViewModel : ViewModel() {
     init {
         _state.value = ScreenState(
             items = listOf(
-                ScreenState.Item("Alice (enabled)", true),
-                ScreenState.Item("Bob (enabled)", true),
-                ScreenState.Item("Carol (enabled)", true),
-                ScreenState.Item("David (enabled)", true),
-                ScreenState.Item("Ellen (enabled)", true),
-                ScreenState.Item("Mallory (disabled)", false),
-                ScreenState.Item("Zoe (enabled)", true),
+                ScreenState.Item("Alice", true),
+                ScreenState.Item("Bob", true),
+                ScreenState.Item("Carol", true),
+                ScreenState.Item("David", true),
+                ScreenState.Item("Ellen", true),
+                ScreenState.Item("Frank", true),
+                ScreenState.Item("Gary", true),
+                ScreenState.Item("Hugh", true),
+                ScreenState.Item("Ian", true),
+                ScreenState.Item("John", true),
+                ScreenState.Item("Keith", true),
+                ScreenState.Item("Lucas", true),
+                ScreenState.Item("Mallory", true),
+                ScreenState.Item("Nathaniel", true),
+                ScreenState.Item("Zoe", true),
+                ScreenState.Item("Unknown", false),
             )
         )
     }

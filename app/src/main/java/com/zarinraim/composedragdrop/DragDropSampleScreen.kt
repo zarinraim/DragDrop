@@ -1,5 +1,6 @@
 package com.zarinraim.composedragdrop
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
@@ -8,7 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
@@ -43,24 +47,18 @@ private fun Content(
     onDrop: (String, String) -> Unit,
     closeDialog: () -> Unit,
 ) {
-    val scrollState = rememberScrollState()
+    val scrollState = rememberLazyListState()
+//    val scrollState = rememberScrollState()
 
     LongPressDraggable(
         draggableItem = { DraggableItem(state = it) },
         scrollState = scrollState,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-        ) {
-            state.items.forEach { item ->
-                SourceTargetItem(
-                    item = item,
-                    onDrop = onDrop
-                )
-            }
-        }
+        ContentLazyColumn(
+            scrollState = scrollState,
+            state = state,
+            onDrop = onDrop,
+        )
     }
 
     if (state.dropDialogVisible) {
@@ -71,6 +69,44 @@ private fun Content(
                 Text(text = state.dialogMessage)
             }
         )
+    }
+}
+
+@Composable
+private fun ContentColumn(
+    scrollState: ScrollState,
+    state: ScreenState,
+    onDrop: (String, String) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+    ) {
+        state.items.forEach() { item ->
+            SourceTargetItem(
+                item = item,
+                onDrop = onDrop
+            )
+        }
+    }
+}
+
+@Composable
+private fun ContentLazyColumn(
+    scrollState: LazyListState,
+    state: ScreenState,
+    onDrop: (String, String) -> Unit,
+) {
+    LazyColumn(state = scrollState, modifier = Modifier.fillMaxSize()) {
+//        item { Spacer(modifier = Modifier.height(16.dp)) }
+        items(state.items) { item ->
+            SourceTargetItem(
+                item = item,
+                onDrop = onDrop
+            )
+        }
+//        item { Spacer(modifier = Modifier.height(16.dp)) }
     }
 }
 
